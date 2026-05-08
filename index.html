@@ -10,29 +10,20 @@
     <header class="topbar">
       <h1>UI块在线编辑器</h1>
       <div class="actions">
-        <label class="editor-label">
-          当前修改人
-          <input id="currentEditorInput" type="text" placeholder="输入你的名字" />
-        </label>
+        <label class="editor-label">当前修改人<input id="currentEditorInput" type="text" placeholder="输入你的名字" /></label>
         <button id="addBlockBtn">+ 新增UI块</button>
       </div>
     </header>
 
     <main>
-      <section class="canvas-wrap">
+      <section class="canvas-wrap fullscreen">
         <div class="section-head">
-          <h2>画布</h2>
-          <label>
-            每行块数
-            <select id="columnsSelect">
-              <option value="1">1列</option>
-              <option value="2" selected>2列</option>
-              <option value="3">3列</option>
-              <option value="4">4列</option>
-            </select>
-          </label>
+          <h2>自由画布（可拖动画布与块）</h2>
+          <small>按住空白区域拖动画布；拖拽块移动；拉右下角改大小；双击看详情</small>
         </div>
-        <div id="canvas" class="canvas"></div>
+        <div id="viewport" class="viewport">
+          <div id="canvas" class="canvas"></div>
+        </div>
       </section>
 
       <aside class="panel">
@@ -40,53 +31,22 @@
         <p id="emptyHint">请先点击一个UI块</p>
         <p id="permissionHint" class="permission-hint hidden"></p>
         <form id="editor" class="hidden">
-          <label>
-            限定修改人
-            <input id="ownerInput" type="text" placeholder="例如：张三" />
-          </label>
-          <label>
-            标题
-            <input id="titleInput" type="text" />
-          </label>
-          <label>
-            内容
-            <textarea id="contentInput" rows="3"></textarea>
-          </label>
-          <label>
-            宽度（px）
-            <input id="widthInput" type="number" min="120" max="800" />
-          </label>
-          <label>
-            高度（px）
-            <input id="heightInput" type="number" min="80" max="600" />
-          </label>
-          <label>
-            字体颜色
-            <input id="textColorInput" type="color" />
-          </label>
-          <label>
-            背景颜色
-            <input id="bgColorInput" type="color" />
-          </label>
-          <label>
-            详细信息
-            <textarea id="detailsInput" rows="4" placeholder="补充详细信息"></textarea>
-          </label>
+          <label>限定修改人<input id="ownerInput" type="text" placeholder="例如：张三" /></label>
+          <label>标题<input id="titleInput" type="text" /></label>
+          <label>内容<textarea id="contentInput" rows="3"></textarea></label>
+          <label>宽度（px）<input id="widthInput" type="number" min="100" max="1200" /></label>
+          <label>高度（px）<input id="heightInput" type="number" min="80" max="900" /></label>
+          <label>X位置（px）<input id="xInput" type="number" /></label>
+          <label>Y位置（px）<input id="yInput" type="number" /></label>
+          <label>字体颜色<input id="textColorInput" type="color" /></label>
+          <label>背景颜色<input id="bgColorInput" type="color" /></label>
+          <label>详细信息<textarea id="detailsInput" rows="4" placeholder="补充详细信息"></textarea></label>
           <button type="button" id="deleteBlockBtn" class="danger">删除当前UI块</button>
         </form>
       </aside>
     </main>
 
-    <dialog id="detailDialog">
-      <form method="dialog" class="dialog-body">
-        <h3 id="dialogTitle">详细信息</h3>
-        <p id="dialogContent"></p>
-        <p id="dialogOwner" class="owner"></p>
-        <p id="dialogDetails" class="details"></p>
-        <button>关闭</button>
-      </form>
-    </dialog>
-
+    <dialog id="detailDialog"><form method="dialog" class="dialog-body"><h3 id="dialogTitle">详细信息</h3><p id="dialogContent"></p><p id="dialogOwner" class="owner"></p><p id="dialogDetails" class="details"></p><button>关闭</button></form></dialog>
     <script src="script.js"></script>
   </body>
 </html>
