@@ -10,20 +10,40 @@
     <header class="topbar">
       <h1>UI块在线编辑器</h1>
       <div class="actions">
+        <label class="editor-label">
+          当前修改人
+          <input id="currentEditorInput" type="text" placeholder="输入你的名字" />
+        </label>
         <button id="addBlockBtn">+ 新增UI块</button>
       </div>
     </header>
 
     <main>
       <section class="canvas-wrap">
-        <h2>画布</h2>
+        <div class="section-head">
+          <h2>画布</h2>
+          <label>
+            每行块数
+            <select id="columnsSelect">
+              <option value="1">1列</option>
+              <option value="2" selected>2列</option>
+              <option value="3">3列</option>
+              <option value="4">4列</option>
+            </select>
+          </label>
+        </div>
         <div id="canvas" class="canvas"></div>
       </section>
 
       <aside class="panel">
         <h2>块属性</h2>
         <p id="emptyHint">请先点击一个UI块</p>
+        <p id="permissionHint" class="permission-hint hidden"></p>
         <form id="editor" class="hidden">
+          <label>
+            限定修改人
+            <input id="ownerInput" type="text" placeholder="例如：张三" />
+          </label>
           <label>
             标题
             <input id="titleInput" type="text" />
@@ -61,6 +81,7 @@
       <form method="dialog" class="dialog-body">
         <h3 id="dialogTitle">详细信息</h3>
         <p id="dialogContent"></p>
+        <p id="dialogOwner" class="owner"></p>
         <p id="dialogDetails" class="details"></p>
         <button>关闭</button>
       </form>

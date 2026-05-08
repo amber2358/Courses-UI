@@ -1,6 +1,8 @@
 const state = {
   blocks: [],
   selectedId: null,
+  currentEditor: '',
+  columns: 2,
 };
 
 const canvas = document.getElementById('canvas');
@@ -8,9 +10,13 @@ const addBlockBtn = document.getElementById('addBlockBtn');
 const deleteBlockBtn = document.getElementById('deleteBlockBtn');
 const editor = document.getElementById('editor');
 const emptyHint = document.getElementById('emptyHint');
+const permissionHint = document.getElementById('permissionHint');
 const detailDialog = document.getElementById('detailDialog');
+const currentEditorInput = document.getElementById('currentEditorInput');
+const columnsSelect = document.getElementById('columnsSelect');
 
 const inputs = {
+  owner: document.getElementById('ownerInput'),
   title: document.getElementById('titleInput'),
   content: document.getElementById('contentInput'),
   width: document.getElementById('widthInput'),
@@ -22,6 +28,7 @@ const inputs = {
 
 const createBlock = () => ({
   id: crypto.randomUUID(),
+  owner: state.currentEditor || '未指定',
   title: '新建模块',
   content: '点击右侧编辑内容',
   width: 220,
@@ -31,8 +38,15 @@ const createBlock = () => ({
   details: '这里可以补充更详细的信息。',
 });
 
+function canEdit(block) {
+  if (!block) return false;
+  if (!block.owner || block.owner === '未指定') return true;
+  return state.currentEditor.trim() === block.owner.trim();
+}
+
 function render() {
   canvas.innerHTML = '';
+  canvas.style.setProperty('--columns', state.columns);
 
   state.blocks.forEach((block) => {
     const el = document.createElement('article');
@@ -44,7 +58,7 @@ function render() {
     el.innerHTML = `
       <h3 class="title">${escapeHtml(block.title)}</h3>
       <p class="content">${escapeHtml(block.content)}</p>
-      <small>点击进入详情</small>
+      <small>修改人：${escapeHtml(block.owner || '未指定')}（双击看详情）</small>
     `;
 
     el.addEventListener('click', () => {
@@ -53,10 +67,7 @@ function render() {
       render();
     });
 
-    el.addEventListener('dblclick', () => {
-      openDetails(block);
-    });
-
+    el.addEventListener('dblclick', () => openDetails(block));
     canvas.appendChild(el);
   });
 }
@@ -65,17 +76,24 @@ function getSelectedBlock() {
   return state.blocks.find((x) => x.id === state.selectedId);
 }
 
+function setFormDisabled(disabled) {
+  Object.values(inputs).forEach((input) => (input.disabled = disabled));
+  deleteBlockBtn.disabled = disabled;
+}
+
 function syncEditor() {
   const block = getSelectedBlock();
   if (!block) {
     editor.classList.add('hidden');
     emptyHint.classList.remove('hidden');
+    permissionHint.classList.add('hidden');
     return;
   }
 
   editor.classList.remove('hidden');
   emptyHint.classList.add('hidden');
 
+  inputs.owner.value = block.owner;
   inputs.title.value = block.title;
   inputs.content.value = block.content;
   inputs.width.value = block.width;
@@ -83,13 +101,20 @@ function syncEditor() {
   inputs.textColor.value = block.textColor;
   inputs.bgColor.value = block.bgColor;
   inputs.details.value = block.details;
+
+  const editable = canEdit(block);
+  setFormDisabled(!editable);
+  permissionHint.classList.toggle('hidden', editable);
+  permissionHint.textContent = editable
+    ? ''
+    : `当前块限定修改人为「${block.owner}」，你当前是「${state.currentEditor || '未填写'}」，仅可查看。`;
 }
 
 function attachEditorEvents() {
   Object.entries(inputs).forEach(([key, input]) => {
     input.addEventListener('input', () => {
       const block = getSelectedBlock();
-      if (!block) return;
+      if (!block || !canEdit(block)) return;
 
       if (key === 'width' || key === 'height') {
         block[key] = Math.max(40, Number(input.value) || 0);
@@ -104,18 +129,30 @@ function attachEditorEvents() {
 function openDetails(block) {
   document.getElementById('dialogTitle').textContent = block.title;
   document.getElementById('dialogContent').textContent = block.content;
+  document.getElementById('dialogOwner').textContent = `限定修改人：${block.owner || '未指定'}`;
   document.getElementById('dialogDetails').textContent = block.details || '暂无详细信息';
   detailDialog.showModal();
 }
 
 function escapeHtml(v) {
-  return v
+  return String(v)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 }
+
+currentEditorInput.addEventListener('input', () => {
+  state.currentEditor = currentEditorInput.value.trim();
+  syncEditor();
+  render();
+});
+
+columnsSelect.addEventListener('change', () => {
+  state.columns = Number(columnsSelect.value) || 2;
+  render();
+});
 
 addBlockBtn.addEventListener('click', () => {
   const block = createBlock();
@@ -126,13 +163,16 @@ addBlockBtn.addEventListener('click', () => {
 });
 
 deleteBlockBtn.addEventListener('click', () => {
-  if (!state.selectedId) return;
+  const block = getSelectedBlock();
+  if (!block || !canEdit(block)) return;
   state.blocks = state.blocks.filter((x) => x.id !== state.selectedId);
   state.selectedId = state.blocks[0]?.id ?? null;
   syncEditor();
   render();
 });
 
+state.currentEditor = '张三';
+currentEditorInput.value = state.currentEditor;
 state.blocks.push(createBlock());
 state.selectedId = state.blocks[0].id;
 attachEditorEvents();
